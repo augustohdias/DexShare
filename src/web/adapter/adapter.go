@@ -1,11 +1,10 @@
 package adapter
 
-import "github.com/gin-gonic/gin"
+import (
+	"dexshare/src/core/service"
 
-type HandlerRoute struct {
-	Path string
-	Func func(*gin.Context)
-}
+	"github.com/gin-gonic/gin"
+)
 
 type Adapter struct {
 	UserController    UserController
@@ -13,21 +12,22 @@ type Adapter struct {
 }
 
 func Default() Adapter {
+	userService := service.DefaultUserService()
 	return Adapter{
-		UserController:    UserController{},
+		UserController:    UserController{UserService: &userService},
 		PokemonController: PokemonController{},
 	}
 }
 
-func (a *Adapter) Get() []HandlerRoute {
-	return []HandlerRoute{
-		{Path: "/user/:id", Func: a.UserController.getUser},
-		{Path: "/pokemon/:id", Func: a.PokemonController.getPokemon},
-	}
+type Route struct {
+	Method string
+	Path   string
+	Func   func(*gin.Context)
 }
 
-func (a *Adapter) Post() []HandlerRoute {
-	return []HandlerRoute{
-		{Path: "/user", Func: a.UserController.createUser},
+func (a *Adapter) Routes() []Route {
+	return []Route{
+		{Path: "/user", Func: a.UserController.CreateUser, Method: "POST"},
+		{Path: "/user/:uid", Func: a.UserController.GetUser, Method: "GET"},
 	}
 }
