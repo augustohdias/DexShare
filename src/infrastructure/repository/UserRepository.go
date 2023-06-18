@@ -13,16 +13,15 @@ type UserRepository struct {
 	collection *mongo.Collection
 }
 
-func (u *UserRepository) Connect() *UserRepository {
+func (u *UserRepository) Connect() {
 	if u.collection == nil {
 		client := MongoConnect()
 		u.collection = client.Database("dexshare").Collection("user")
 	}
-	return u
 }
 
 func (u *UserRepository) Save(user entity.UserEntity) (string, error) {
-	u = u.Connect()
+	u.Connect()
 	_, err := u.collection.InsertOne(context.Background(), user)
 	if err != nil {
 		log.SetPrefix("[UserRepository] [Save] ")
@@ -33,7 +32,7 @@ func (u *UserRepository) Save(user entity.UserEntity) (string, error) {
 }
 
 func (u *UserRepository) Find(id string) (entity.UserEntity, error) {
-	u = u.Connect()
+	u.Connect()
 	var user entity.UserEntity
 	err := u.collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&user)
 	if err != nil {
@@ -45,7 +44,7 @@ func (u *UserRepository) Find(id string) (entity.UserEntity, error) {
 }
 
 func (u *UserRepository) FindByEmail(email string) (entity.UserEntity, error) {
-	u = u.Connect()
+	u.Connect()
 	var user entity.UserEntity
 	err := u.collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
 	if err != nil {

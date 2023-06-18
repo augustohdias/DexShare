@@ -1,9 +1,8 @@
 package entity
 
 type PokemonEntity struct {
-	ID                string `bson:"id"`
+	ID                string `bson:"id" validate:"omitempty"`
 	Name              string `bson:"name"`
-	OwnerID           string `bson:"ownerId"`
-	NationalDexNumber int    `bson:"nationalDexNumber"`
 	Level             int    `bson:"level"`
+	NationalDexNumber int    `bson:"nationalDexNumber"`
 }

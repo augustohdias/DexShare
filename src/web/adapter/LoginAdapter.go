@@ -2,40 +2,51 @@ package adapter
 
 import (
 	"dexshare/src/port"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type LoginController struct {
-	LoginService port.LoginPort
+type LoginAdapter struct {
+	LoginPort port.LoginPort
 }
 
-func (l *LoginController) Login(c *gin.Context) {
+func (l *LoginAdapter) Authenticate(c *gin.Context) {
+	token := c.Request.Header.Get("Authorization")
+	id := c.Param("uid")
+	if !l.LoginPort.Authenticate(id, token) {
+		c.Status(http.StatusUnauthorized)
+		c.Abort()
+		return
+	}
+	c.Next()
+}
+
+func (l *LoginAdapter) Login(c *gin.Context) {
 	type Request struct {
 		Email    string `json:"email" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 
-	type Response struct {
-		Token string `json:"token"`
-	}
-
 	var req Request
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
 		return
 	}
 
-	token, err := l.LoginService.Authenticate(req.Email, req.Password)
+	token, err := l.LoginPort.Login(req.Email, req.Password)
 	if err != nil {
-		log.Println(err)
 		c.Status(http.StatusUnauthorized)
+		c.Abort()
 		return
 	}
 
+	type Response struct {
+		Token string `json:"token"`
+	}
 	c.JSON(http.StatusAccepted, Response{
 		Token: token,
 	})
+	c.Next()
 }

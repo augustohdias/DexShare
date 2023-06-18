@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "go",
+            "name": "GoLang",
+            "goExecPath": "go",
+            "buildParams": ["./src"],
+        },
+    ]
+}

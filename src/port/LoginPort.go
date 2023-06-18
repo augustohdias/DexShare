@@ -3,10 +3,11 @@ package port
 import "dexshare/src/core/entity"
 
 type LoginPort interface {
-	Authenticate(string, string) (string, error)
+	Login(email string, pass string) (string, error)
+	Authenticate(uid string, token string) bool
 }
 
 type UserSessionRepositoryPort interface {
-	Save(entity.UserSessionEntity) (string, error)
-	Find(string) (entity.UserSessionEntity, error)
+	Save(user entity.UserSessionEntity) (string, error)
+	Find(userId string) (entity.UserSessionEntity, error)
 }
