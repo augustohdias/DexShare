@@ -32,7 +32,7 @@ func MongoConnect() *mongo.Client {
 	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return client
 }

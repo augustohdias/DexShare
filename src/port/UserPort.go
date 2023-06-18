@@ -7,10 +7,10 @@ type UserServicePort interface {
 	Read(string) (entity.UserEntity, error)
 	Update(string) (entity.UserEntity, error)
 	Delete(string) (entity.UserEntity, error)
-	Authenticate(string) (entity.UserEntity, error)
 }
 
 type UserRepositoryPort interface {
 	Save(entity.UserEntity) (string, error)
 	Find(string) (entity.UserEntity, error)
+	FindByEmail(string) (entity.UserEntity, error)
 }

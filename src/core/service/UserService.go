@@ -2,8 +2,8 @@ package service
 
 import (
 	"dexshare/src/core/entity"
-	"dexshare/src/domain/port"
 	"dexshare/src/infrastructure/repository"
+	"dexshare/src/port"
 
 	"github.com/google/uuid"
 )
@@ -43,9 +43,5 @@ func (us *UserService) Update(id string) (entity.UserEntity, error) {
 }
 
 func (us *UserService) Delete(id string) (entity.UserEntity, error) {
-	return entity.UserEntity{}, nil
-}
-
-func (us *UserService) Authenticate(credentials string) (entity.UserEntity, error) {
 	return entity.UserEntity{}, nil
 }

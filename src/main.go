@@ -10,7 +10,7 @@ func main() {
 	adapter := adapter.Default()
 	router := gin.Default()
 	setupRoutes(router, adapter.Routes())
-	router.Run("localhost:8080")
+	router.Run("0.0.0.0:8080")
 }
 
 func setupRoutes(router *gin.Engine, routes []adapter.Route) {

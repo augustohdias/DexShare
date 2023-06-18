@@ -2,7 +2,7 @@ package adapter
 
 import (
 	"dexshare/src/core/entity"
-	"dexshare/src/domain/port"
+	"dexshare/src/port"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,8 +17,8 @@ func (u *UserController) GetUser(c *gin.Context) {
 	type Response struct {
 		ID        string   `json:"id"`
 		Name      string   `json:"name"`
-		Followers []string `json:"Followers"`
-		Following []string `json:"Following"`
+		Followers []string `json:"followers"`
+		Following []string `json:"following"`
 	}
 	id := c.Param("uid")
 	user, err := u.UserService.Read(id)
