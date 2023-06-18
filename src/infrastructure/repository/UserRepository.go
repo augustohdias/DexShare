@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"dexshare/src/core/entity"
-	"dexshare/src/infrastructure/database"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +15,7 @@ type UserRepository struct {
 
 func (u *UserRepository) Connect() *UserRepository {
 	if u.collection == nil {
-		client := database.MongoConnect()
+		client := MongoConnect()
 		u.collection = client.Database("dexshare").Collection("user")
 	}
 	return u
