@@ -3,7 +3,6 @@ package service
 import (
 	"dexshare/src/core/entity"
 	"dexshare/src/core/parser"
-	"dexshare/src/infrastructure/repository"
 	"dexshare/src/port"
 	"encoding/base64"
 	"log"
@@ -12,12 +11,15 @@ import (
 )
 
 type UserService struct {
-	UserRepository port.UserRepositoryPort
+	UserRepository    port.UserRepositoryPort
 	PokemonRepository port.PokemonRepositoryPort
 }
 
-func DefaultUserService() UserService {
-	return UserService{UserRepository: &repository.UserRepository{}}
+func DefaultUserService(userRepository port.UserRepositoryPort, pokemonRepository port.PokemonRepositoryPort) UserService {
+	return UserService{
+		UserRepository:    userRepository,
+		PokemonRepository: pokemonRepository,
+	}
 }
 
 func (us *UserService) Create(user entity.UserEntity) (string, error) {
@@ -36,7 +38,7 @@ func (us *UserService) Create(user entity.UserEntity) (string, error) {
 
 func (us *UserService) Read(id string) (entity.UserEntity, error) {
 	user, err := us.UserRepository.Find(id)
-	if  err != nil {
+	if err != nil {
 		return entity.UserEntity{}, err
 	}
 	return user, nil
@@ -55,9 +57,17 @@ func (us *UserService) UploadSaveFile(userID string, data string) (entity.UserEn
 		return entity.UserEntity{}, err
 	}
 	saveData := parser.LoadSaveFile(decodedSaveFile)
+
+	teamPokemons := saveData.Team.Pokemons
+	pcPokemons := saveData.PC.Pokemons
+	allPokemons := make([]entity.PokemonEntity, len(teamPokemons) + len(pcPokemons))
+	copy(allPokemons, teamPokemons)
+	copy(allPokemons[len(teamPokemons):], pcPokemons)
+
 	var pokemonIDs []string
-	for _, pokemon := range saveData.Team.Pokemons {
+	for _, pokemon := range allPokemons {
 		pokemon.ID = uuid.NewString()
+		pokemon.OwnerID = userID
 		_, err := us.PokemonRepository.Save(pokemon)
 		if err != nil {
 			log.Println("Failed to update pokemons.")
@@ -65,13 +75,16 @@ func (us *UserService) UploadSaveFile(userID string, data string) (entity.UserEn
 		}
 		pokemonIDs = append(pokemonIDs, pokemon.ID)
 	}
+	for _, pokemon := range user.Pokemons {
+		us.PokemonRepository.Delete(pokemon)
+	}
 	user.Pokemons = pokemonIDs
-	_, err = us.UserRepository.Save(user)
+	updatedUser, err := us.UserRepository.UpdatePokemons(user)
 	if err != nil {
 		log.Println("Couldn't update user.")
 		return entity.UserEntity{}, err
 	}
-	return entity.UserEntity{}, nil
+	return updatedUser, nil
 }
 
 func (us *UserService) Delete(id string) (entity.UserEntity, error) {

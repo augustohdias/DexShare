@@ -3,7 +3,6 @@ package service
 import (
 	"crypto/rand"
 	"dexshare/src/core/entity"
-	"dexshare/src/infrastructure/repository"
 	"dexshare/src/port"
 	"encoding/hex"
 	"errors"
@@ -19,10 +18,10 @@ type LoginService struct {
 	UserRepository        port.UserRepositoryPort
 }
 
-func DefaultLoginService() LoginService {
+func DefaultLoginService(userSessionRepository port.UserSessionRepositoryPort, userRepository port.UserRepositoryPort) LoginService {
 	return LoginService{
-		UserSessionRepository: &repository.UserSessionRepository{},
-		UserRepository:        &repository.UserRepository{},
+		UserSessionRepository: userSessionRepository,
+		UserRepository:        userRepository,
 	}
 }
 

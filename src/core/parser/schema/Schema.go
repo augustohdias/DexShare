@@ -28,7 +28,7 @@ type TeamSection struct {
 }
 
 type PCSection struct {
-	PCBox []PCBufferSection
+	Pokemons []entity.PokemonEntity
 }
 
 type PCBufferSection struct {

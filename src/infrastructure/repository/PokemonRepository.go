@@ -13,15 +13,16 @@ type PokemonRepository struct {
 	collection *mongo.Collection
 }
 
-func (p *PokemonRepository) Connect() {
+func NewPokemonRepository() PokemonRepository {
+	p := PokemonRepository{}
 	if p.collection == nil {
 		client := MongoConnect()
 		p.collection = client.Database("dexshare").Collection("pokemon")
 	}
+	return p
 }
 
 func (p *PokemonRepository) Save(pokemon entity.PokemonEntity) (string, error) {
-	p.Connect()
 	_, err := p.collection.InsertOne(context.Background(), pokemon)
 	if err != nil {
 		log.SetPrefix("[PokemonRepository] [Save] ")
@@ -31,8 +32,15 @@ func (p *PokemonRepository) Save(pokemon entity.PokemonEntity) (string, error) {
 	return pokemon.ID, nil
 }
 
+func (p *PokemonRepository) Delete(pokemonID string) {
+	filter := bson.M{"id": pokemonID}
+	_, err := p.collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (p *PokemonRepository) Find(id string) (entity.PokemonEntity, error) {
-	p.Connect()
 	var pokemon entity.PokemonEntity
 	err := p.collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&pokemon)
 	if err != nil {

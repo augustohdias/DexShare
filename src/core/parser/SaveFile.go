@@ -47,28 +47,51 @@ func parseSave(section string, file []byte, replyChannel chan<- schema.SaveData)
 		startingOffset = endingOffset + 8
 	}
 	var pcBuffer [][]byte
-	for i := 4; i < 14; i++ {
+	for i := 5; i < 14; i++ {
 		pcBuffer = append(pcBuffer, sections[i])
 	}
+	pc := readPCSection(pcBuffer)
 	trainerInfo := readTrainerInfo(sections[0])
 	team := readTeamSection(trainerInfo.Game, sections[1])
 	saveData := schema.SaveData{
 		SaveCount:   saveCount,
 		TrainerInfo: trainerInfo,
 		Team:        team,
-		PC:          schema.PCSection{},
+		PC:          pc,
 	}
 	replyChannel <- saveData
 }
 
+func readPCSection(pcBuffer [][]byte) schema.PCSection {
+	const MaxBoxSize = 30
+	const PokemonSize = 80
+	var pokemons []entity.PokemonEntity
+	for i, buffer := range pcBuffer {
+		for j := 0; j < MaxBoxSize; j++ {
+			box := buffer
+			if i == 0 {
+				box = buffer[4:]
+			}
+			pokemonDecoder := decoder.PokemonDecoder{}
+			pokemon := pokemonDecoder.Decode(box[j*PokemonSize:])
+			if (pokemon != entity.PokemonEntity{}) {
+				pokemon.Level = 0 // Pokemons on PC needs too much to calculate level
+				pokemons = append(pokemons, pokemon)
+			}
+		}
+	}
+	return schema.PCSection{Pokemons: pokemons}
+}
+
 func readTeamSection(game schema.GameType, data []byte) schema.TeamSection {
+	const PokemonSize = 100
 	if game == schema.FireRedLeafGreen {
 		teamSize := readInt(data[0x034 : 0x034+4]).(int)
 		partyData := data[0x038 : 0x038+600]
 		var pokemons []entity.PokemonEntity
 		for i := 0; i < teamSize; i++ {
 			pokemonDecoder := decoder.PokemonDecoder{}
-			pokemons = append(pokemons, pokemonDecoder.Decode(partyData[i*100:(i+1)*100]))
+			pokemons = append(pokemons, pokemonDecoder.Decode(partyData[i*PokemonSize:]))
 		}
 		return schema.TeamSection{Size: teamSize, Pokemons: pokemons}
 	}

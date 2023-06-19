@@ -24,7 +24,10 @@ func (p *PokemonDecoder) Decode(data []byte) entity.PokemonEntity {
 	}
 	species := int(binary.LittleEndian.Uint16(dataToDecrypt[:2]))
 	name := StringDecoder{}.Decode(data[8:18]).(string)
-	level := int(data[84])
+	level := readInt(data[84:85]).(int)
+	if species == 0 || species >= 440 || (species >= 252 && species <= 276) {
+		return entity.PokemonEntity{}
+	}
 	log.Printf("#%d: %s Lv.%d\n", species, name, level)
 	return entity.PokemonEntity{
 		Name:              name,
@@ -44,4 +47,12 @@ func findShufflingTemplate(x int) string {
 		return shuffleTemplates[x]
 	}
 	return ""
+}
+
+func readInt(bytes []byte) interface{} {
+	acc := 0
+	for i, b := range bytes {
+		acc += int(b) << (i * 8)
+	}
+	return acc
 }

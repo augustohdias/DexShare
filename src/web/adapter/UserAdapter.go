@@ -14,24 +14,39 @@ type UserAdapter struct {
 }
 
 func (u *UserAdapter) GetUser(c *gin.Context) {
-	type Response struct {
-		ID        string   `json:"id"`
-		Name      string   `json:"name"`
-		Followers []string `json:"followers"`
-		Following []string `json:"following"`
-	}
 	id := c.Param("uid")
 	user, err := u.UserService.Read(id)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
+	type Response struct {
+		ID        string   `json:"id"`
+		Name      string   `json:"name"`
+		Pokemons  []string `json:"pokemons"`
+		Followers []string `json:"followers"`
+		Following []string `json:"following"`
+	}
+	pokemons := user.Pokemons
+	if pokemons == nil {
+		pokemons = []string{}
+	}
+	followers := user.Followers
+	if followers == nil {
+		followers = []string{}
+	}
+	following := user.Following
+	if following == nil {
+		following = []string{}
+	}
 	c.JSON(http.StatusOK, Response{
 		ID:        user.ID,
 		Name:      user.Name,
-		Followers: user.Followers,
-		Following: user.Following,
+		Pokemons:  pokemons,
+		Followers: followers,
+		Following: following,
 	})
+	c.Next()
 }
 
 func (u *UserAdapter) UploadSaveFile(c *gin.Context) {

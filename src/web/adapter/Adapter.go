@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"dexshare/src/core/service"
+	"dexshare/src/infrastructure/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +14,12 @@ type Adapter struct {
 }
 
 func Default() Adapter {
-	userService := service.DefaultUserService()
-	loginService := service.DefaultLoginService()
+	userRepository := repository.NewUserRepository()
+	pokemonRepository := repository.NewPokemonRepository()
+	userSessionRepository := repository.NewUserSessionRepository()
+
+	userService := service.DefaultUserService(&userRepository, &pokemonRepository)
+	loginService := service.DefaultLoginService(&userSessionRepository, &userRepository)
 	return Adapter{
 		UserAdapter:    UserAdapter{UserService: &userService},
 		LoginAdapter:   LoginAdapter{LoginPort: &loginService},

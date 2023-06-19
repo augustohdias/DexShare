@@ -10,7 +10,8 @@ type UserServicePort interface {
 }
 
 type UserRepositoryPort interface {
-	Save(entity.UserEntity) (string, error)
-	Find(string) (entity.UserEntity, error)
-	FindByEmail(string) (entity.UserEntity, error)
+	Save(user entity.UserEntity) (string, error)
+	Find(id string) (entity.UserEntity, error)
+	UpdatePokemons(user entity.UserEntity) (entity.UserEntity, error)
+	FindByEmail(email string) (entity.UserEntity, error)
 }

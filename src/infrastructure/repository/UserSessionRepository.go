@@ -14,7 +14,8 @@ type UserSessionRepository struct {
 	collection *mongo.Collection
 }
 
-func (u *UserSessionRepository) Connect() *UserSessionRepository {
+func NewUserSessionRepository() UserSessionRepository {
+	u := UserSessionRepository{}
 	if u.collection == nil {
 		client := MongoConnect()
 		u.collection = client.Database("dexshare").Collection("userSession")
@@ -23,7 +24,6 @@ func (u *UserSessionRepository) Connect() *UserSessionRepository {
 }
 
 func (u *UserSessionRepository) Save(session entity.UserSessionEntity) (string, error) {
-	u = u.Connect()
 	filter := bson.M{"userId": session.UserID}
 	update := bson.M{"$set": session}
 	opts := options.Update().SetUpsert(true)
@@ -37,7 +37,6 @@ func (u *UserSessionRepository) Save(session entity.UserSessionEntity) (string, 
 }
 
 func (u *UserSessionRepository) Find(userId string) (entity.UserSessionEntity, error) {
-	u = u.Connect()
 	var session entity.UserSessionEntity
 	err := u.collection.FindOne(context.Background(), bson.M{"id": userId}).Decode(&session)
 	if err != nil {
